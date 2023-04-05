@@ -11,7 +11,7 @@ class GetPrediction {
 
   double misurazione = 0;
   String risultato = "";
-  double widthM = 22.25;
+  double widthM = 21.25;
 
   double midpoint2(double x1, double x2) {
     return ((x1 + x2) * 0.5);
@@ -96,47 +96,49 @@ class GetPrediction {
     try {
       final String result = await platform.invokeMethod('getOcchio');
       List<String> split = result.split("/");
-      if ((split[0].contains("occhio") && split[1].contains("moneta")) ||
-          (split[0].contains("moneta") && split[1].contains("occhio"))) {
+      if ((split[0].contains("occhio") && split[2].contains("moneta")) ||
+          (split[0].contains("moneta") && split[2].contains("occhio"))) {
         String occhio;
         String moneta;
 
         if (split[0].contains("occhio")) {
-          occhio = split[0];
+          occhio = split[1];
+          moneta = split[3];
+          List<String> splitOcchio = occhio.split("|");
+          List<String> splitMoneta = moneta.split("|");
+          misura(
+              widthM,
+              double.parse(splitMoneta[0]),
+              double.parse(splitMoneta[1]),
+              double.parse(splitMoneta[2]),
+              double.parse(splitMoneta[3]),
+              double.parse(splitOcchio[0]),
+              double.parse(splitOcchio[1]),
+              double.parse(splitOcchio[2]),
+              double.parse(splitOcchio[3]));
+        } else {
+          occhio = split[3];
           moneta = split[1];
           List<String> splitOcchio = occhio.split("|");
           List<String> splitMoneta = moneta.split("|");
           misura(
               widthM,
+              double.parse(splitMoneta[0]),
               double.parse(splitMoneta[1]),
               double.parse(splitMoneta[2]),
               double.parse(splitMoneta[3]),
-              double.parse(splitMoneta[4]),
+              double.parse(splitOcchio[0]),
               double.parse(splitOcchio[1]),
               double.parse(splitOcchio[2]),
-              double.parse(splitOcchio[3]),
-              double.parse(splitOcchio[4]));
-        } else {
-          occhio = split[1];
-          moneta = split[0];
-          List<String> splitOcchio = occhio.split("|");
-          List<String> splitMoneta = moneta.split("|");
-          misura(
-              widthM,
-              double.parse(splitMoneta[1]),
-              double.parse(splitMoneta[2]),
-              double.parse(splitMoneta[3]),
-              double.parse(splitMoneta[4]),
-              double.parse(splitOcchio[1]),
-              double.parse(splitOcchio[2]),
-              double.parse(splitOcchio[3]),
-              double.parse(splitOcchio[4]));
+              double.parse(splitOcchio[3]));
         }
       } else {
         throw new Exception("Non è presente occhio e/o moneta");
       }
 
       print(result);
+      print(misurazione);
+      print(risultato);
     } on Exception catch (e) {
       prediction = e.toString();
     }

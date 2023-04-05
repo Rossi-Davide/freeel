@@ -65,13 +65,12 @@ public class MainActivity extends FlutterActivity {
       List<Category> category = obj.getCategories();
 
       for (int i = 0; i < category.size(); i++) {
-        test += category.get(i).getLabel() + "|";
+        test += category.get(i).getLabel() + "/";
 
       }
 
       RectF box = obj.getBoundingBox();
-      test += box.left + "|" + box.top + "|" + box.right + "|" + box.bottom + "/" + "moneta" + "|" + 0 + "|" + 0 + "|"
-          + 0 + "|" + 0;
+      test += box.left + "|" + box.top + "|" + box.right + "|" + box.bottom + "/";
     }
 
     return test;
@@ -100,15 +99,15 @@ public class MainActivity extends FlutterActivity {
       // Initialization
       ObjectDetectorOptions options = ObjectDetectorOptions.builder()
           .setBaseOptions(BaseOptions.builder().useGpu().build())
-          .setMaxResults(2)
-          .setScoreThreshold(0.4f)
+          .setMaxResults(10)
+          .setScoreThreshold(0.1f)
           .build();
 
       Context context = getApplicationContext();
 
       ObjectDetector objectDetector = ObjectDetector.createFromFileAndOptions(context, "android.tflite", options);
 
-      File mSaveBit = new File(context.getCacheDir(), "test/prova2.jpg");
+      File mSaveBit = new File(context.getCacheDir(), "test/prova2.JPG");
       String filePath = mSaveBit.getPath();
       Bitmap imageBitmap = BitmapFactory.decodeFile(filePath);
 
