@@ -6,16 +6,17 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DecoratedBox(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("assets/immagini/sfondo_base.png"), fit:BoxFit.cover
+        body: DecoratedBox(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage("assets/immagini/sfondo_02.png"),
+                  fit: BoxFit.cover),
             ),
-          ),
-          child: Center(
-            child: Image.asset("assets/immagini/logo.png"),
-          )
-      ),
-    );
+            child: Column(children: [
+              Center(
+                child: Image.asset('assets/immagini/freel.png'),
+              ),
+              const Spacer(flex: 2),
+            ])));
   }
 }

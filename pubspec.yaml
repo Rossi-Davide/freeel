@@ -2,7 +2,7 @@ name: app_5ij
 description: A new Flutter project.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
+  sdk: ">=2.19.2 <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -31,16 +31,22 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   curved_navigation_bar: ^1.0.3
-  camerawesome: ^1.2.1
   better_open_file: ^3.6.4
   path_provider: ^2.0.13
   pigeon: ^9.0.4
+  camera: ^0.10.4
   video_player: ^2.5.3
+  animated_bottom_navigation_bar: ^1.2.0
+  settings_ui: ^2.0.2
+  permission_handler: ^10.2.0
+  intl: ^0.18.0
+  location: ^4.4.0
+  sqflite: ^2.2.6
+  mutex: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -58,7 +64,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -66,8 +71,15 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/immagini/logo.png
-    - assets/immagini/sfondo_base.png
+    - assets/immagini/logo_freel.png
+    - assets/immagini/sfondo_01.png
+    - assets/immagini/sfondo_02.png
+    - assets/immagini/icona_monete.png
+    - assets/immagini/icona_mail.png
+    - assets/immagini/icona_del_tabella.png
+    - assets/immagini/icon-button-camera.png
+    - assets/immagini/freel.png
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

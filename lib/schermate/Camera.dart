@@ -10,6 +10,7 @@ import '../data/DBFoto.dart';
 import 'Impostazioni.dart';
 import 'package:location/location.dart';
 import '../model_Manager.dart';
+import 'package:mutex/mutex.dart';
 
 class Camera extends StatefulWidget {
   @override
@@ -115,18 +116,11 @@ class _CameraState extends State<Camera> {
         //   _long = posizione.longitude!;
         // }
 
-        // VALORI PROVVISORI IN ATTESA DEI MODULI SPECIFICI
-        GetPrediction get = GetPrediction(valoreMoneta, nomeCompleto);
-        double _risultato = -1;
-        double _misura = -1;
+        GetPrediction get;
 
-        final int ris = await DBFoto.creaFoto(nomeCompleto, destinazione,
-            _risultato, _misura, _lat, _long, dataCattura, oraCattura);
-        if (ris > 0) {
-          print("Inserimento nel database effettuato");
-        } else {
-          print("Inserimento nel database non effettuato");
-        }
+        // VALORI PROVVISORI IN ATTESA DEI MODULI SPECIFICI
+        get = await GetPrediction(valoreMoneta, nomeCompleto, true,
+            nomeCompleto, _lat, _long, oraCattura, dataCattura);
       });
     }
   }

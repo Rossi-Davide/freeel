@@ -37,14 +37,17 @@ public class MainActivity extends FlutterActivity {
 
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+
     super.configureFlutterEngine(flutterEngine);
     new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
         .setMethodCallHandler(
             (call, result) -> {
               // This method is invoked on the main thread.
               // TODO
+
               if (call.method.equals("getOcchio")) {
-                String prova = getOcchio();
+                String percorso = call.argument("percorso");
+                String prova = getOcchio(percorso);
 
                 if (prova != null) {
                   result.success(prova);
@@ -70,7 +73,7 @@ public class MainActivity extends FlutterActivity {
       }
 
       RectF box = obj.getBoundingBox();
-      test += box.left + "|" + box.top + "|" + box.right + "|" + box.bottom + "/";
+      test += box.left + "|" + box.top + "|" + box.right + "|" + box.bottom;
     }
 
     return test;
@@ -93,38 +96,60 @@ public class MainActivity extends FlutterActivity {
     return outputBitmap;
   }
 
-  private String getOcchio() {
+  private String getOcchio(String percorso) {
     try {
 
-      // Initialization
-      ObjectDetectorOptions options = ObjectDetectorOptions.builder()
-          .setBaseOptions(BaseOptions.builder().useGpu().build())
-          .setMaxResults(10)
-          .setScoreThreshold(0.1f)
-          .build();
-
+      // prende la foto
       Context context = getApplicationContext();
 
-      ObjectDetector objectDetector = ObjectDetector.createFromFileAndOptions(context, "android.tflite", options);
-
-      File mSaveBit = new File(context.getCacheDir(), "test/prova2.JPG");
+      File mSaveBit = new File(percorso);
       String filePath = mSaveBit.getPath();
       Bitmap imageBitmap = BitmapFactory.decodeFile(filePath);
-
       TensorImage image = TensorImage.fromBitmap(imageBitmap);
 
-      List<Detection> results = objectDetector.detect(image);
+      // occhio
 
-      String test = debugPrint(results);
+      ObjectDetectorOptions optionsOcchio = ObjectDetectorOptions.builder()
+          .setBaseOptions(BaseOptions.builder().useGpu().build())
+          .setMaxResults(1)
+          .setScoreThreshold(0.3f)
+          .build();
 
-      Bitmap rectImage = drawDetectionResult(imageBitmap, results);
+      ObjectDetector objectDetectorOcchio = ObjectDetector.createFromFileAndOptions(context, "occhioModel.tflite",
+          optionsOcchio);
+
+      List<Detection> resultsOcchio = objectDetectorOcchio.detect(image);
+
+      String resOcchioString = debugPrint(resultsOcchio);
+
+      // moneta
+      ObjectDetectorOptions optionsMoneta = ObjectDetectorOptions.builder()
+          .setBaseOptions(BaseOptions.builder().useGpu().build())
+          .setMaxResults(1)
+          .setScoreThreshold(0.6f)
+          .build();
+
+      ObjectDetector objectDetectorMoneta = ObjectDetector.createFromFileAndOptions(context, "det4onlymoney.tflite",
+          optionsMoneta);
+
+      List<Detection> resultsMoneta = objectDetectorMoneta.detect(image);
+
+      String resMonetaString = debugPrint(resultsMoneta);
+
+      // mettiamo assieme risultati
+      String resString = resOcchioString + "/" + resMonetaString;
+
+      // disegno foto
+
+      Bitmap rectImage = drawDetectionResult(imageBitmap, resultsOcchio);
+      Bitmap rectImage2 = drawDetectionResult(rectImage, resultsMoneta);
 
       // create a file to write bitmap data
       File f = new File(context.getCacheDir(), "rectImage.png");
       f.createNewFile();
 
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      rectImage.compress(Bitmap.CompressFormat.PNG, 0, bos);
+      rectImage2.compress(Bitmap.CompressFormat.PNG, 0, bos);
       byte[] bitmapData = bos.toByteArray();
 
       // write the bytes in file
@@ -133,9 +158,7 @@ public class MainActivity extends FlutterActivity {
       fos.flush();
       fos.close();
 
-      String path = context.getCacheDir() + "/rectImage.png";
-
-      return test;
+      return resString;
 
     } catch (Exception e) {
       return e.getMessage();

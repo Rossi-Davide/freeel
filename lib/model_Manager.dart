@@ -1,23 +1,28 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:better_open_file/better_open_file.dart';
-import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart';
+import 'package:mutex/mutex.dart';
+import '../data/DBFoto.dart';
 
 class GetPrediction {
   static var platform;
 
   double misurazione = 0;
-  String risultato = "";
-  double widthM = 21.25;
+  int risultato = 0;
+  int _index = 0;
+  String percorso = "";
+  var width = [16.25, 18.75, 21.25, 19.75, 22.25, 24.25, 22.25, 25.75];
+  bool dinamica = true;
+  String oraFoto = "";
+  String dataFoto = "";
+  double latitude = 0.0;
+  double longitude = 0;
+  String nomeFoto = "";
 
-  double midpoint2(double x1, double x2) {
-    return ((x1 + x2) * 0.5);
-  }
-
-  double midpoint1(double y1, double y2) {
+  double midpoint(double y1, double y2) {
     return ((y1 + y2) * 0.5);
   }
 
@@ -41,16 +46,16 @@ class GetPrediction {
         tlblY = 0,
         trbrX = 0,
         trbrY = 0;
-    tltrX = midpoint2(leftM, rightM);
-    tltrY = midpoint1(topM, topM);
-    blbrX = midpoint2(leftM, rightM);
-    blbrY = midpoint1(botM, botM);
-    tlblX = midpoint2(leftM, leftM);
-    tlblY = midpoint1(topM, botM);
-    trbrX = midpoint2(rightM, rightM);
-    trbrY = midpoint1(topM, botM);
-    double distanceX = (tltrY - blbrY);
-    double distanceY = (tlblX - trbrX);
+    // tltrX = midpoint(leftM, rightM);
+    // tltrY = midpoint(topM, topM);
+    // blbrX = midpoint(leftM, rightM);
+    // blbrY = midpoint(botM, botM);
+    // tlblX = midpoint(leftM, leftM);
+    // tlblY = midpoint(topM, botM);
+    // trbrX = midpoint(rightM, rightM);
+    // trbrY = midpoint(topM, botM);
+    double distanceX = (rightM - leftM);
+    double distanceY = (botM - topM);
     double distanceM = (distanceX + distanceY) / 2;
     pixelsPerMetric = distanceM / widthM;
     double tltrXanguilla = 0,
@@ -61,40 +66,57 @@ class GetPrediction {
         tlblYanguilla = 0,
         trbrXanguilla = 0,
         trbrYanguilla = 0;
-    tltrXanguilla = midpoint2(leftA, rightA);
-    tltrYanguilla = midpoint1(topA, topA);
-    blbrXanguilla = midpoint2(leftA, rightA);
-    blbrYanguilla = midpoint1(botA, botA);
-    tlblXanguilla = midpoint2(leftA, leftA);
-    tlblYanguilla = midpoint1(topA, botA);
-    trbrXanguilla = midpoint2(rightA, rightA);
-    trbrYanguilla = midpoint1(topA, botA);
-    double distanceXanguilla = (tltrYanguilla - blbrYanguilla);
-    double distanceYanguilla = (tlblXanguilla - trbrXanguilla);
-    double dimAanguilla = distanceXanguilla / pixelsPerMetric;
-    double dimBanguilla = distanceYanguilla / pixelsPerMetric;
+    // tltrXanguilla = midpoint(leftA, rightA);
+    // tltrYanguilla = midpoint(topA, topA);
+    // blbrXanguilla = midpoint(leftA, rightA);
+    // blbrYanguilla = midpoint(botA, botA);
+    // tlblXanguilla = midpoint(leftA, leftA);
+    // tlblYanguilla = midpoint(topA, botA);
+    // trbrXanguilla = midpoint(rightA, rightA);
+    // trbrYanguilla = midpoint(topA, botA);
+    double distanceXanguilla = (rightA - leftA);
+    double distanceYanguilla = (botA - topA);
+    double distanceAnguilla = (distanceXanguilla + distanceYanguilla) / 2;
+    double dimanguilla = distanceAnguilla / pixelsPerMetric;
+    // double dimBanguilla = distanceYanguilla / pixelsPerMetric;
 
-    misurazione = (dimAanguilla + dimBanguilla) / 2;
+    misurazione = dimanguilla - 0.5;
     if (misurazione >= 0.1 && misurazione < 6.6) {
-      risultato = "residente";
+      risultato = 1;
     } else if (misurazione >= 6.6 && misurazione < 7) {
-      risultato = "migrante al 90%";
+      risultato = 0;
     } else {
-      risultato = "migrante";
+      risultato = -1;
     }
   }
 
-  GetPrediction(double width) {
+  GetPrediction(int index, String percorsoFoto, bool mod, String nomeComp,
+      double lat, double long, String ora, String data) {
     platform = MethodChannel('app.5i.lifeel.dev/tensorflow');
-    widthM = width;
+    _index = index;
+    dinamica = mod;
+    if (dinamica == true) {
+      percorso = percorsoFoto;
+    } else {
+      percorso = "/data/user/0/com.example.app_5ij/app_flutter/freel/foto2.jpg";
+    }
+
+    nomeFoto = nomeComp;
+    latitude = lat;
+    longitude = long;
+    oraFoto = ora;
+    dataFoto = data;
+
     _getPrediction();
   }
 
   Future<void> _getPrediction() async {
     String prediction;
-
+    final m = Mutex();
+    m.acquire();
     try {
-      final String result = await platform.invokeMethod('getOcchio');
+      final String result = await platform
+          .invokeMethod('getOcchio', <String, dynamic>{'percorso': percorso});
       List<String> split = result.split("/");
       if ((split[0].contains("occhio") && split[2].contains("moneta")) ||
           (split[0].contains("moneta") && split[2].contains("occhio"))) {
@@ -107,7 +129,7 @@ class GetPrediction {
           List<String> splitOcchio = occhio.split("|");
           List<String> splitMoneta = moneta.split("|");
           misura(
-              widthM,
+              width[_index],
               double.parse(splitMoneta[0]),
               double.parse(splitMoneta[1]),
               double.parse(splitMoneta[2]),
@@ -122,7 +144,7 @@ class GetPrediction {
           List<String> splitOcchio = occhio.split("|");
           List<String> splitMoneta = moneta.split("|");
           misura(
-              widthM,
+              width[_index],
               double.parse(splitMoneta[0]),
               double.parse(splitMoneta[1]),
               double.parse(splitMoneta[2]),
@@ -139,8 +161,18 @@ class GetPrediction {
       print(result);
       print(misurazione);
       print(risultato);
+
+      final int ris = await DBFoto.creaFoto(nomeFoto, percorso, risultato,
+          misurazione, latitude, longitude, dataFoto, oraFoto);
+      if (ris > 0) {
+        print("Inserimento nel database effettuato");
+      } else {
+        print("Inserimento nel database non effettuato");
+      }
     } on Exception catch (e) {
       prediction = e.toString();
+    } finally {
+      m.release();
     }
   }
 }

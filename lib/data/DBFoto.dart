@@ -3,7 +3,8 @@ import 'package:sqflite/sqflite.dart' as SQL;
 
 class DBFoto {
   static Future<void> creaTabelle(SQL.Database database) async {
-    await database.execute("""
+    await database.execute(
+        """
       CREATE TABLE Foto (
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       nome VARCHAR(255),
@@ -81,8 +82,8 @@ class DBFoto {
   }
 
   // Aggiunge alla tabella una nuova foto
-  static Future<int> creaFoto(String n, String p, double r, double m,
-      double lat, double lon, String dcatt, String ocatt) async {
+  static Future<int> creaFoto(String n, String p, int r, double m, double lat,
+      double lon, String dcatt, String ocatt) async {
     final db = await DBFoto.db();
 
     final data = {
